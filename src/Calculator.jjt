@@ -26,16 +26,17 @@ int eval(SimpleNode node) {
 	  int acum = 0;
 		for(int i = 0; i < node.jjtGetNumChildren(); i++)
 		{
-		  acum += eval((SimpleNode)node.jjtGetChild(i));
+			eval((SimpleNode)node.jjtGetChild(i));
 		  
 		}
-		return acum;
+		return 0;
 	}
+	
   
 	if(node.jjtGetNumChildren() == 0) // leaf node with integer value
 		return node.val;
 	else if(node.jjtGetNumChildren() == 1)	{
-	  System.out.println("ola biba");
+	  
 	  return this.eval((SimpleNode) node.jjtGetChild(0));	} // only one child
 		
 
@@ -49,6 +50,7 @@ int eval(SimpleNode node) {
 		case CalculatorTreeConstants.JJTMUL : res= ( eval( lhs ) * eval( rhs )); System.out.println("Valor da expressão " + cnt++ + ": " + res); return res;
 		case CalculatorTreeConstants.JJTDIV : res= ( eval( lhs ) / eval( rhs )); System.out.println("Valor da expressão " + cnt++ + ": " + res); return res;
 		case CalculatorTreeConstants.JJTASSIGNMENT: return 0;
+		 
 		default : // abort
 			System.out.println("Operador ilegal!");
 			System.exit(1);
@@ -72,7 +74,7 @@ TOKEN:
 }
 
 SimpleNode Program(): {}
-{	((Assignment() | Expr1()) < SEPARATOR > (<LF >)*)+ < FIN >	{	  return jjtThis;
+{	((Assignment() | Expr1(1)) < SEPARATOR > (<LF >)*)+ < FIN >	{	  return jjtThis;
 	}
 }
 SimpleNode Assignment(): { Token t1, t2;}
@@ -80,23 +82,31 @@ SimpleNode Assignment(): { Token t1, t2;}
  t1 = < VARIABLE > "=" t2 = < INTEGER > {symbolTable.put(t1.image, Integer.parseInt(t2.image)); jjtThis.val = 0; return jjtThis;}}
 SimpleNode Expression(): {}
 {
- Expr1() <LF> {return jjtThis;} // código Java entre chavetas
+ Expr1(1) < LF >{return jjtThis;} // código Java entre chavetas
 }
-void Expr1() #void: {}
+void Expr1(int sign) #void: {}
 {
- Expr2(1) [("+" Expr2(1) #Add(2)| "-" Expr2(1) #Sub(2))]
+ Expr2(sign) [("+" Expr2(sign) #Add(2)| "-" Expr2(sign) #Sub(2))]
 }	
 
 void Expr2(int sign) #void: {}
 {
  Expr3(sign) [("*" Expr3(1) #Mul(2) | "/" Expr3(1) #Div(2))]
  }
-void Expr3(int sign) #void: {Token t;}
+void Expr3(int sign) #void: {}
 {
- t = <INTEGER> {
-   jjtThis.val = Integer.parseInt(t.image) * sign; } #Term
- | t = < VARIABLE > {
-   jjtThis.val = ((int)symbolTable.get(t.image))*sign; } #Term
- | "-" Expr3(-1)
- | "(" Expr1() ")"
+  "-" Expr4(-1*sign)
+ | Expr4(sign)
 }
+void Expr4(int sign) #void : {Token t;}
+{
+  t = <INTEGER>
+ {
+   jjtThis.val = Integer.parseInt(t.image) * sign;
+ } #Term
+ | t = < VARIABLE >
+ {
+   jjtThis.val = ((int)symbolTable.get(t.image))*sign;
+ } #Term
+| "(" Expr1(sign) ")"}
+
