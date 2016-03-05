@@ -7,6 +7,7 @@ import java.util.Hashtable;
 public class Calculator
 {
   public static Hashtable symbolTable = new Hashtable();
+  int cnt = 1;
   
  public static void main(String args[]) throws ParseException {
 	Calculator myCalc = new Calculator(System.in);
@@ -16,10 +17,10 @@ public class Calculator
 	SimpleNode root = myCalc.Program(); // devolve referência para o nó raiz da árvore
 
 	root.dump(""); // imprime no ecrã a árvore
-	System.out.println("Valor da expressão: "+myCalc.eval(root));
+	myCalc.eval(root);//System.out.println("Valor da expressão: "+myCalc.eval(root));
  }
 int eval(SimpleNode node) {
-	//node.dump(node.id);
+	//node.dump(Integer.toString(node.id));
 	if(node.id == CalculatorTreeConstants.JJTPROGRAM)
 	{
 	  int acum = 0;
@@ -33,17 +34,20 @@ int eval(SimpleNode node) {
   
 	if(node.jjtGetNumChildren() == 0) // leaf node with integer value
 		return node.val;
-	else if(node.jjtGetNumChildren() == 1) // only one child
-		return this.eval((SimpleNode) node.jjtGetChild(0));
+	else if(node.jjtGetNumChildren() == 1)	{
+	  System.out.println("ola biba");
+	  return this.eval((SimpleNode) node.jjtGetChild(0));	} // only one child
+		
 
 	
 	SimpleNode lhs = (SimpleNode) node.jjtGetChild(0); //left child
 	SimpleNode rhs = (SimpleNode) node.jjtGetChild(1); // right child
+	
 	switch(node.id) {
-		case CalculatorTreeConstants.JJTADD : return eval( lhs ) + eval( rhs );
-		case CalculatorTreeConstants.JJTSUB : return eval( lhs ) - eval( rhs );
-		case CalculatorTreeConstants.JJTMUL : return eval( lhs ) * eval( rhs );
-		case CalculatorTreeConstants.JJTDIV : return eval( lhs ) / eval( rhs );
+		case CalculatorTreeConstants.JJTADD : int res= ( eval( lhs ) + eval( rhs )); System.out.println("Valor da expressão " + cnt++ + ": " + res); return res;
+		case CalculatorTreeConstants.JJTSUB : res= ( eval( lhs ) - eval( rhs )); System.out.println("Valor da expressão " + cnt++ + ": " + res); return res;
+		case CalculatorTreeConstants.JJTMUL : res= ( eval( lhs ) * eval( rhs )); System.out.println("Valor da expressão " + cnt++ + ": " + res); return res;
+		case CalculatorTreeConstants.JJTDIV : res= ( eval( lhs ) / eval( rhs )); System.out.println("Valor da expressão " + cnt++ + ": " + res); return res;
 		case CalculatorTreeConstants.JJTASSIGNMENT: return 0;
 		default : // abort
 			System.out.println("Operador ilegal!");
